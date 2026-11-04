@@ -52,7 +52,9 @@ GitHub stores the source code. GitHub Pages can host static files, but it cannot
 
 ## API
 
-There is one endpoint: **POST** `/api/verify`. Send JSON with an `image` field containing base64-encoded image bytes. A data URL such as `data:image/jpeg;base64,...` is also accepted. Images are limited to 10 MB after decoding.
+There are two endpoints. Both accept JSON with an `image` field containing base64-encoded image bytes. A data URL such as `data:image/jpeg;base64,...` is also accepted. Images are limited to 10 MB after decoding.
+
+### Verify image — `POST /api/verify`
 
 ```json
 {
@@ -73,6 +75,38 @@ Example using `curl` with a base64 string:
 
 ```sh
 curl -X POST http://127.0.0.1:8000/api/verify \
+  -H "Content-Type: application/json" \
+  -d '{"image":"BASE64_IMAGE_DATA"}'
+```
+
+### Get face embeddings — `POST /api/embedding`
+
+Send one image in `image` or multiple images in `images`. The endpoint does not apply image-quality or enrollment checks. It returns an embedding for every face the detector finds in each image; an image with no detected faces has an empty `embeddings` list. Each embedding is the JSON representation of a `byte[]`: base64-encoded little-endian float32 values.
+
+```json
+{
+  "images": ["BASE64_IMAGE_1", "BASE64_IMAGE_2"]
+}
+```
+
+The response keeps results in the same order as the images. Each embedding is a base64 string containing 128 float32 values (512 decoded bytes):
+
+```json
+{
+  "results": [
+    {"embeddings": ["BASE64_FLOAT32_BYTES_FOR_FACE_1"], "face_count": 1},
+    {"embeddings": [], "face_count": 0}
+  ],
+  "dtype": "float32",
+  "dimensions": 128,
+  "encoding": "base64 little-endian byte[]"
+}
+```
+
+The repository includes Qualcomm's published float ONNX MobileFaceNet model in `models/mobilefacenet.onnx`, with its required external weights in `models/mobile_facenet.data`. It produces a 128-dimensional embedding and accepts 112x112 RGB inputs in the `[0, 1]` range. Qualcomm identifies the model's license as Apache-2.0. See its [model card and downloads](https://huggingface.co/qualcomm/MobileFaceNet), the [Qualcomm model implementation](https://github.com/qualcomm/ai-hub-models/tree/main/src/qai_hub_models/models/mobile_facenet), and the upstream [MobileFaceNet implementation](https://github.com/foamliu/MobileFaceNet). To use another compatible ONNX model, set `MOBILEFACENET_MODEL_PATH` to its location. Face alignment uses the detector's five landmarks.
+
+```sh
+curl -X POST http://127.0.0.1:8000/api/embedding \
   -H "Content-Type: application/json" \
   -d '{"image":"BASE64_IMAGE_DATA"}'
 ```

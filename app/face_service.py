@@ -3,17 +3,22 @@
 from __future__ import annotations
 
 import io
+import os
 from typing import Any
+from pathlib import Path
 
 import cv2
 import numpy as np
 from PIL import Image
 from insightface.app import FaceAnalysis
+from insightface.utils.face_align import norm_crop
+import onnxruntime as ort
 
 from app.quality import assess_face_quality
 
 
 _face_analyzer: FaceAnalysis | None = None
+_mobilefacenet_session: ort.InferenceSession | None = None
 
 
 def _get_face_analyzer() -> FaceAnalysis:
@@ -133,3 +138,88 @@ def analyze_image(file_bytes: bytes) -> dict[str, Any]:
         "acceptable_for_enrollment": enrollment_ok,
         "message": message,
     }
+
+
+def _get_mobilefacenet_session() -> ort.InferenceSession:
+    global _mobilefacenet_session
+    if _mobilefacenet_session is None:
+        model_path = Path(os.environ.get("MOBILEFACENET_MODEL_PATH", "models/mobilefacenet.onnx"))
+        if not model_path.is_file():
+            raise FaceAnalysisError(
+                f"MobileFaceNet ONNX model not found at '{model_path}'. Set MOBILEFACENET_MODEL_PATH to the model file.",
+                500,
+            )
+        try:
+            _mobilefacenet_session = ort.InferenceSession(
+                str(model_path), providers=["CPUExecutionProvider"]
+            )
+        except Exception as exc:
+            raise FaceAnalysisError(f"Could not load MobileFaceNet ONNX model: {exc}", 500) from exc
+    return _mobilefacenet_session
+
+
+def extract_mobilefacenet_embedding(file_bytes: bytes) -> list[bytes]:
+    """Return one normalized float32 embedding for every detected face."""
+    image_bgr = _read_image(file_bytes)
+    try:
+        faces = _get_face_analyzer().get(image_bgr)
+    except Exception as exc:
+        raise FaceAnalysisError(f"Face detection failed: {exc}", 500) from exc
+    if not faces:
+        return []
+
+    try:
+        session = _get_mobilefacenet_session()
+        input_metas = session.get_inputs()
+        input_meta = input_metas[0]
+        shape = input_meta.shape
+        # MobileFaceNet models commonly use [1, 3, 112, 112]; accept NCHW/NHWC.
+        if len(shape) != 4:
+            raise ValueError("Expected a four-dimensional image input")
+        if isinstance(shape[1], int) and shape[1] == 3:
+            nchw = True
+            height = int(shape[2]) if isinstance(shape[2], int) else 112
+            width = int(shape[3]) if isinstance(shape[3], int) else 112
+        elif isinstance(shape[3], int) and shape[3] == 3:
+            nchw = False
+            height = int(shape[1]) if isinstance(shape[1], int) else 112
+            width = int(shape[2]) if isinstance(shape[2], int) else 112
+        else:
+            raise ValueError("Expected a three-channel NCHW or NHWC image input")
+        if width != height:
+            raise ValueError("MobileFaceNet input must be square for face alignment")
+        embeddings: list[bytes] = []
+        img_h, img_w = image_bgr.shape[:2]
+        for face in faces:
+            landmarks = getattr(face, "kps", None)
+            if landmarks is not None:
+                aligned = norm_crop(image_bgr, landmarks, image_size=width)
+            else:
+                x1, y1, x2, y2 = (int(round(float(value))) for value in face.bbox)
+                crop = image_bgr[max(0, y1):min(img_h, y2), max(0, x1):min(img_w, x2)]
+                if crop.size == 0:
+                    continue
+                aligned = cv2.resize(crop, (width, height))
+
+            rgb = cv2.cvtColor(aligned, cv2.COLOR_BGR2RGB).astype(np.float32)
+            # Qualcomm's published float model accepts RGB pixels in [0, 1].
+            tensor = rgb / 255.0
+            if nchw:
+                tensor = np.transpose(tensor, (2, 0, 1))
+            tensor = np.expand_dims(tensor, 0).astype(np.float32)
+            # The published export takes two images and returns two embeddings.
+            output = session.run(
+                None, {meta.name: tensor for meta in input_metas}
+            )[0]
+            if output.ndim == 2:
+                output = output[0]
+            embedding = np.asarray(output, dtype=np.float32).reshape(-1)
+            norm = float(np.linalg.norm(embedding))
+            if embedding.size == 0 or not np.isfinite(embedding).all() or norm <= 0:
+                raise ValueError("Model returned an invalid embedding")
+            embeddings.append((embedding / norm).astype("<f4", copy=False).tobytes())
+        return embeddings
+    except FaceAnalysisError:
+        raise
+    except Exception as exc:
+        raise FaceAnalysisError(f"MobileFaceNet inference failed: {exc}", 500) from exc
