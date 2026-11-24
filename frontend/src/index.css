@@ -1,0 +1,72 @@
+@import 'tailwindcss';
+
+/* Dark, low-contrast palette: warm charcoal with soft pastel accents. */
+@theme {
+  --color-bg: #171615;
+  --color-surface: #1f1d1c;
+  --color-raised: #282624;
+  --color-line: #2e2c2a;
+  --color-ink: #d6d1c9;
+  --color-ink-strong: #ebe6de;
+  --color-muted: #8a847c;
+  --color-faint: #5f5a54;
+  --color-sage: #93ad9c;
+  --color-sage-soft: #24302a;
+  --color-ochre: #cfae7b;
+  --color-ochre-soft: #2e2921;
+  --color-meter: #2c2a27;
+  --color-frame: #121110;
+
+  /* Feature colors, shared with the canvas drawing in lib/draw.js */
+  --color-amber: #e0b66e;
+  --color-teal: #6cc4b6;
+  --color-coral: #de867a;
+  --color-t1: #7fa3d6;
+  --color-t2: #b296d6;
+  --color-t3: #d98a7c;
+
+  --font-sans: 'Nunito', system-ui, -apple-system, sans-serif;
+  --font-display: 'Fredoka', 'Nunito', system-ui, sans-serif;
+
+  --radius-card: 1.5rem;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-bg font-sans text-ink antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  font-size: 15px;
+  line-height: 1.55;
+  min-height: 100svh;
+}
+
+::selection {
+  background: rgba(147, 173, 156, 0.3);
+}
+
+:focus-visible {
+  outline: 2px solid rgba(147, 173, 156, 0.7);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Flat, solid card. */
+@utility card {
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

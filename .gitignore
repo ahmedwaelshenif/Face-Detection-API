@@ -11,9 +11,20 @@ __pycache__/
 # InsightFace downloaded model cache
 .insightface/
 
+# Node / Frontend artifacts
+node_modules/
+*/node_modules/
+dist/
+*/dist/
+.vite/
+*/.vite/
+*.local
+
 # Local environment and secrets
 .env
 .env.*
+*.env
+*.env.*
 !.env.example
 
 # Local test image (may contain a person's face)
