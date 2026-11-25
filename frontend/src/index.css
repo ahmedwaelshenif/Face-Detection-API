@@ -1,29 +1,29 @@
 @import 'tailwindcss';
 
-/* Dark, low-contrast palette: warm charcoal with soft pastel accents. */
+/* Black and white palette. */
 @theme {
-  --color-bg: #171615;
-  --color-surface: #1f1d1c;
-  --color-raised: #282624;
-  --color-line: #2e2c2a;
-  --color-ink: #d6d1c9;
-  --color-ink-strong: #ebe6de;
-  --color-muted: #8a847c;
-  --color-faint: #5f5a54;
-  --color-sage: #93ad9c;
-  --color-sage-soft: #24302a;
-  --color-ochre: #cfae7b;
-  --color-ochre-soft: #2e2921;
-  --color-meter: #2c2a27;
-  --color-frame: #121110;
+  --color-bg: #ffffff;
+  --color-surface: #ffffff;
+  --color-raised: #f5f5f5;
+  --color-line: #e5e5e5;
+  --color-ink: #333333;
+  --color-ink-strong: #000000;
+  --color-muted: #666666;
+  --color-faint: #888888;
+  --color-sage: #222222;
+  --color-sage-soft: #f0f0f0;
+  --color-ochre: #444444;
+  --color-ochre-soft: #f2f2f2;
+  --color-meter: #dddddd;
+  --color-frame: #fafafa;
 
   /* Feature colors, shared with the canvas drawing in lib/draw.js */
-  --color-amber: #e0b66e;
-  --color-teal: #6cc4b6;
-  --color-coral: #de867a;
-  --color-t1: #7fa3d6;
-  --color-t2: #b296d6;
-  --color-t3: #d98a7c;
+  --color-amber: #333333;
+  --color-teal: #555555;
+  --color-coral: #777777;
+  --color-t1: #333333;
+  --color-t2: #666666;
+  --color-t3: #999999;
 
   --font-sans: 'Nunito', system-ui, -apple-system, sans-serif;
   --font-display: 'Fredoka', 'Nunito', system-ui, sans-serif;
@@ -32,7 +32,7 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
@@ -44,12 +44,89 @@ body {
   min-height: 100svh;
 }
 
+.verification-card button:disabled {
+  background-color: #333333;
+  color: #ffffff;
+  opacity: 1;
+}
+
+.camera-wallpaper {
+  background-color: #ffffff;
+  background-image: url('/camera-wallpaper.png');
+  background-position: center;
+  background-size: cover;
+  background-attachment: fixed;
+}
+
+.camera-particle-stage {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.camera-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 22% 52%,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.68) 10%,
+    rgba(255, 255, 255, 0.22) 28%,
+    transparent 52%
+  );
+  opacity: 0;
+  animation: camera-shutter-flash 7s ease-in-out infinite;
+}
+
+.camera-particle {
+  position: absolute;
+  top: 0;
+  transform: translateY(110vh);
+  animation: camera-particle-rise linear infinite;
+}
+
+.camera-particle-dot {
+  display: block;
+  border-radius: 50%;
+  background: #000000;
+  opacity: 0.8;
+  animation: camera-particle-sway ease-in-out infinite alternate;
+}
+
+@keyframes camera-particle-rise {
+  0% { transform: translateY(110vh); opacity: 0; }
+  12% { opacity: 0.8; }
+  88% { opacity: 0.55; }
+  100% { transform: translateY(-12px); opacity: 0; }
+}
+
+@keyframes camera-particle-sway {
+  from { transform: translateX(-24px); }
+  to { transform: translateX(24px); }
+}
+
+@keyframes camera-shutter-flash {
+  0%, 91%, 100% { opacity: 0; }
+  92% { opacity: 0.9; }
+  93% { opacity: 0.25; }
+  94% { opacity: 0.7; }
+  96% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .camera-particle,
+  .camera-particle-dot,
+  .camera-flash { animation: none; }
+}
+
 ::selection {
-  background: rgba(147, 173, 156, 0.3);
+  background: rgba(0, 0, 0, 0.12);
 }
 
 :focus-visible {
-  outline: 2px solid rgba(147, 173, 156, 0.7);
+  outline: 2px solid rgba(0, 0, 0, 0.55);
   outline-offset: 2px;
   border-radius: 10px;
 }
@@ -60,8 +137,22 @@ body {
 
 /* Flat, solid card. */
 @utility card {
+  --color-surface: #111111;
+  --color-raised: #242424;
+  --color-line: #3a3a3a;
+  --color-ink: #e5e5e5;
+  --color-ink-strong: #ffffff;
+  --color-muted: #ffffff;
+  --color-faint: #ffffff;
+  --color-sage: #333333;
+  --color-sage-soft: #303030;
+  --color-ochre: #d0d0d0;
+  --color-ochre-soft: #292929;
+  --color-meter: #444444;
+  --color-frame: #1b1b1b;
   border-radius: var(--radius-card);
   background: var(--color-surface);
+  color: var(--color-ink);
 }
 
 @utility no-scrollbar {

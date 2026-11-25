@@ -4,12 +4,13 @@ import { Button, Icon } from './ui';
 
 interface EmailVerificationProps {
   onVerified: (email: string, token: string) => void;
+  step: 'enter_email' | 'enter_otp';
+  onStepChange: (step: 'enter_email' | 'enter_otp') => void;
 }
 
-export function EmailVerification({ onVerified }: EmailVerificationProps) {
+export function EmailVerification({ onVerified, step, onStepChange }: EmailVerificationProps) {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'enter_email' | 'enter_otp'>('enter_email');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -45,7 +46,7 @@ export function EmailVerification({ onVerified }: EmailVerificationProps) {
         throw new Error(data.message || 'Failed to send verification code. Please try again.');
       }
 
-      setStep('enter_otp');
+      onStepChange('enter_otp');
       setResendCooldown(60);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to send verification code.';
@@ -93,7 +94,7 @@ export function EmailVerification({ onVerified }: EmailVerificationProps) {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: 'easeOut' }}
-        className="card relative w-full overflow-hidden border border-line bg-surface p-6 sm:p-8"
+        className="card verification-card relative w-full overflow-hidden border border-line bg-surface p-6 sm:p-8"
       >
         {/* Glow */}
         <div
@@ -106,14 +107,14 @@ export function EmailVerification({ onVerified }: EmailVerificationProps) {
           <span className="rounded-full bg-raised px-3 py-1 text-xs font-semibold tracking-wider text-muted uppercase">
             Step 01 / 02 · Verification
           </span>
-          <span className="flex items-center gap-1.5 text-xs font-semibold text-sage">
+          <span className="flex items-center gap-1.5 text-xs font-semibold text-white">
             <Icon name="lock" className="h-3.5 w-3.5" />
             Secure Access
           </span>
         </div>
 
         <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-raised text-sage shadow-inner">
+          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-raised text-white shadow-inner">
             <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="4" width="20" height="16" rx="2" />
               <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
@@ -152,7 +153,7 @@ export function EmailVerification({ onVerified }: EmailVerificationProps) {
                     required
                     autoFocus
                     disabled={loading}
-                    className="w-full rounded-2xl border border-line bg-frame px-4 py-3.5 text-sm font-medium text-ink placeholder:text-muted/60 focus:border-sage focus:outline-none"
+                    className="w-full rounded-2xl border border-line bg-frame px-4 py-3.5 text-sm font-medium text-ink placeholder:text-white focus:border-sage focus:outline-none"
                   />
                 </div>
               </div>
@@ -171,7 +172,7 @@ export function EmailVerification({ onVerified }: EmailVerificationProps) {
                 variant="primary"
                 type="submit"
                 disabled={loading || !email.trim()}
-                className="mt-2 w-full py-3.5 text-base font-semibold"
+                className="mt-2 w-full py-3.5 text-base font-semibold disabled:opacity-100 disabled:text-white disabled:bg-[#333]"
               >
                 {loading ? 'Sending code…' : 'Send verification code →'}
               </Button>
@@ -193,10 +194,10 @@ export function EmailVerification({ onVerified }: EmailVerificationProps) {
                   <button
                     type="button"
                     onClick={() => {
-                      setStep('enter_email');
+                      onStepChange('enter_email');
                       setError(null);
                     }}
-                    className="text-xs font-semibold text-sage hover:underline"
+                    className="cursor-pointer text-xs font-semibold text-white hover:underline"
                   >
                     Change email
                   </button>
@@ -210,7 +211,7 @@ export function EmailVerification({ onVerified }: EmailVerificationProps) {
                   required
                   autoFocus
                   disabled={loading}
-                  className="w-full text-center tracking-[0.4em] font-mono text-2xl font-bold rounded-2xl border border-line bg-frame px-4 py-3.5 text-sage placeholder:tracking-normal placeholder:font-sans placeholder:text-sm placeholder:text-muted/50 focus:border-sage focus:outline-none"
+                  className="w-full text-center tracking-[0.4em] font-mono text-2xl font-bold rounded-2xl border border-line bg-frame px-4 py-3.5 text-white placeholder:tracking-normal placeholder:font-sans placeholder:text-sm placeholder:text-[#888] focus:border-sage focus:outline-none"
                 />
               </div>
 
@@ -242,7 +243,7 @@ export function EmailVerification({ onVerified }: EmailVerificationProps) {
                     type="button"
                     disabled={loading}
                     onClick={() => handleSendOtp()}
-                    className="cursor-pointer font-semibold text-sage hover:underline"
+                    className="cursor-pointer font-semibold text-white hover:underline"
                   >
                     Resend code
                   </button>

@@ -470,7 +470,7 @@ function FeatureRows({ group, m, color }: { group: Group; m: Metrics; color: str
       {rows.map(({ label, format, measures, typical, spread, value, reading }) => (
         <Expandable
           key={label}
-          className="rounded-2xl bg-raised px-4 transition-colors hover:bg-[#2d2b29]"
+          className="rounded-2xl bg-raised px-4 transition-colors hover:bg-line"
           headerClassName="py-3"
           header={
             <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2">
