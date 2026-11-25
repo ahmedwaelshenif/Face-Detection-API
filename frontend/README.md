@@ -13,7 +13,7 @@ Integrated biometrics enrollment application powered by the modern Face Analyzer
 ## Requirements
 
 - Node.js 18+
-- Backend Face Detection & OTP Server running at `http://127.0.0.1:8000`
+- Backend Face Detection & OTP Server running at `http://127.0.0.1:8100`
 - Monitoring System ASP.NET Core API at `https://localhost:7062`
 
 ## Running the Application

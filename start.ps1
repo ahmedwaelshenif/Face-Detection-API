@@ -29,8 +29,8 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host "Starting Clear Face Detection Server..." -ForegroundColor Cyan
 Write-Host "Directory: $(Get-Location)" -ForegroundColor Gray
-Write-Host "JSON API: POST http://127.0.0.1:8000/api/verify" -ForegroundColor Gray
-& ".\.venv\Scripts\python.exe" -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+Write-Host "JSON API: POST http://127.0.0.1:8100/api/verify" -ForegroundColor Gray
+& ".\.venv\Scripts\python.exe" -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8100
 if ($LASTEXITCODE -ne 0) {
     Write-Error "The service stopped with an error. Review the messages above."
     exit $LASTEXITCODE

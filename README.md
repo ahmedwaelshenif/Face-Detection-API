@@ -39,7 +39,7 @@ Double-click `start.bat` in the root folder, or run:
 ```powershell
 .\start.bat
 ```
-*(On first run, this automatically creates `.venv`, installs requirements, and launches `http://127.0.0.1:8000`)*.
+*(On first run, this automatically creates `.venv`, installs requirements, and launches `http://127.0.0.1:8100`)*.
 
 ---
 

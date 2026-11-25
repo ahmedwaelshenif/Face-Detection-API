@@ -21,13 +21,13 @@ if errorlevel 1 (
 echo ========================================================
 echo Starting Clear Face Detection & Registration Backend...
 echo Directory: %CD%
-echo Face API:      POST http://127.0.0.1:8000/api/verify
-echo Embedding API: POST http://127.0.0.1:8000/api/embedding
-echo OTP Send:      POST http://127.0.0.1:8000/api/otp/send
-echo OTP Verify:    POST http://127.0.0.1:8000/api/otp/verify
+echo Face API:      POST http://127.0.0.1:8100/api/verify
+echo Embedding API: POST http://127.0.0.1:8100/api/embedding
+echo OTP Send:      POST http://127.0.0.1:8100/api/otp/send
+echo OTP Verify:    POST http://127.0.0.1:8100/api/otp/verify
 echo ========================================================
 
-".venv\Scripts\python.exe" -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+".venv\Scripts\python.exe" -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8100
 if errorlevel 1 goto :startup_failed
 goto :eof
 
