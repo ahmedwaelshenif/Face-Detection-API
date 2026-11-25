@@ -123,10 +123,6 @@ export default function App() {
           </p>
         )}
       </main>
-
-      <footer className="relative z-10 border-t border-line py-6 text-center text-xs text-faint">
-        MONITORING SYSTEM <span>·</span> BIOMETRIC FACE REGISTRATION PORTAL
-      </footer>
     </div>
   );
 }
